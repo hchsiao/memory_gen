@@ -1,0 +1,2 @@
+set(TSMC90Memory_RF_1P_BIN rf_sp_adv)
+set(TSMC90Memory_SRAM_1P_BIN sram_sp_adv)

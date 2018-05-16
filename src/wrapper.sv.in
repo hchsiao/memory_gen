@@ -1,0 +1,18 @@
+module @MEMGEN_INSTNAME@_wrapper (
+  input  [$clog2(@MEMGEN_SIZE@)-1:0] addr_i,
+  input  [@MEMGEN_BIT_WIDTH@-1:0]    wdata_i,
+  output [@MEMGEN_BIT_WIDTH@-1:0]    rdata_o,
+  input                              enable_i,
+  input                              write_i,
+  input                              clk_i
+);
+  @MEMGEN_INSTNAME@ MEM (
+    .Q(rdata_o),
+    .CLK(clk_i),
+    .CEN(~enable_i),
+    .WEN(~write_i),
+    .A(addr_i),
+    .D(wdata_i),
+    .EMA(3'b0)
+  );
+endmodule
