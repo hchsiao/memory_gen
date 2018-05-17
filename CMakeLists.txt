@@ -4,7 +4,10 @@ project(memory_gen)
 include(ChipCMake)
 
 # Create an IP entry without source file
-specify_design()
+get_property(is_specified GLOBAL PROPERTY memory_gen_IP_SOURCES SET)
+if(NOT is_specified)
+  specify_design()
+endif()
 
 function(add_memory_macro _MEM_NAME)
   # The function will be called out of this IP (e.g. the PARENT_SCOPE)
@@ -26,7 +29,7 @@ function(add_memory_macro _MEM_NAME)
 
   if(${MEMGEN_RF})
     add_custom_command(OUTPUT ${sim_model}
-      COMMAND ${TSMC90Memory_SRAM_1P_BIN} verilog -spec ${mem_spec}
+      COMMAND ${TSMC90Memory_RF_1P_BIN} verilog -spec ${mem_spec}
       COMMENT "Generating memory"
     )
 
@@ -41,6 +44,6 @@ function(add_memory_macro _MEM_NAME)
     configure_file(${memory_gen_DIR}/src/wrapper.sv.in ${sim_wrapper})
     configure_file(${memory_gen_DIR}/src/sram_1p.spec.in ${mem_spec})
   endif()
-  add_custom_target(memory_gen DEPENDS ${sim_model})
-  add_dependencies(c2mk_pre_simulation memory_gen)
+  add_custom_target(memory_gen_target_${_MEM_NAME} DEPENDS ${sim_model})
+  add_dependencies(c2mk_pre_simulation memory_gen_target_${_MEM_NAME})
 endfunction()
