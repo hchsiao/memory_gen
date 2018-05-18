@@ -33,8 +33,8 @@ function(add_memory_macro _MEM_NAME)
       COMMENT "Generating memory"
     )
 
-    configure_file(${memory_gen_DIR}/src/regfile_1p.spec.in
-      ${CMAKE_CURRENT_BINARY_DIR}/${_MEM_NAME}.spec)
+    configure_file(${memory_gen_DIR}/src/wrapper.sv.in ${sim_wrapper})
+    configure_file(${memory_gen_DIR}/src/regfile_1p.spec.in ${mem_spec})
   else() # SRAM
     add_custom_command(OUTPUT ${sim_model}
       COMMAND ${TSMC90Memory_SRAM_1P_BIN} verilog -spec ${mem_spec}
