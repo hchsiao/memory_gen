@@ -31,6 +31,6 @@ top_layer=met5-9
 vclef-fp.inst2ring=blockages
 vclef-fp.site_def=off
 vert=met2
-words=@MEMGEN_SIZE@
+words=@MEMGEN_PHY_SIZE@
 wp_size=8
 write_mask=off

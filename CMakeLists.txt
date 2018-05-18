@@ -33,6 +33,12 @@ function(add_memory_macro _MEM_NAME)
       COMMENT "Generating memory"
     )
 
+    set(MEMGEN_PHY_SIZE 0)
+    while(MEMGEN_PHY_SIZE LESS MEMGEN_SIZE)
+      math(EXPR MEMGEN_PHY_SIZE "${MEMGEN_PHY_SIZE}+${MEMGEN_MUX}*2")
+    endwhile()
+    message("Requested memory size: ${MEMGEN_SIZE}, actual physical size ${MEMGEN_PHY_SIZE}")
+
     configure_file(${memory_gen_DIR}/src/wrapper.sv.in ${sim_wrapper})
     configure_file(${memory_gen_DIR}/src/regfile_1p.spec.in ${mem_spec})
   else() # SRAM
@@ -40,6 +46,12 @@ function(add_memory_macro _MEM_NAME)
       COMMAND ${TSMC90Memory_SRAM_1P_BIN} verilog -spec ${mem_spec}
       COMMENT "Generating memory"
     )
+
+    set(MEMGEN_PHY_SIZE 0)
+    while(MEMGEN_PHY_SIZE LESS MEMGEN_SIZE)
+      math(EXPR MEMGEN_PHY_SIZE "${MEMGEN_PHY_SIZE}+${MEMGEN_MUX}*4")
+    endwhile()
+    message("Requested memory size: ${MEMGEN_SIZE}, actual physical size ${MEMGEN_PHY_SIZE}")
 
     configure_file(${memory_gen_DIR}/src/wrapper.sv.in ${sim_wrapper})
     configure_file(${memory_gen_DIR}/src/sram_1p.spec.in ${mem_spec})
