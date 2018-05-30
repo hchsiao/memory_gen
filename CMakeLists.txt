@@ -27,6 +27,9 @@ function(add_memory_macro _MEM_NAME)
   cmake_parse_arguments(MEMGEN "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(MEMGEN_INSTNAME ${_MEM_NAME})
 
+  if(NOT DEFINED MEMGEN_MUX)
+    message(FATAL_ERROR "Parameter MUX not defined")
+  endif()
   if(${MEMGEN_RF})
     add_custom_command(OUTPUT ${sim_model}
       COMMAND ${TSMC90Memory_RF_1P_BIN} verilog -spec ${mem_spec}
