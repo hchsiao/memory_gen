@@ -19,7 +19,8 @@ function(add_memory_macro _MEM_NAME)
   set(sim_wrapper ${CMAKE_CURRENT_BINARY_DIR}/${_MEM_NAME}_wrapper.v)
 
   # Cannot use specify_design() here, since the function will be called out of this IP
-  add_ip_sources(memory_gen ${sim_model} ${sim_wrapper})
+  DONTUSE_add_ip_sources(memory_gen ${sim_model} ${sim_wrapper})
+  # Try using specify_design() instead
 
   set(options SRAM RF)
   set(oneValueArgs BIT_WIDTH FREQ MUX SIZE)
