@@ -1,0 +1,3 @@
+read_lib  @syn_lib@
+write_lib @_MEM_NAME@ -output @syn_db@
+exit
