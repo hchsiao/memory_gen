@@ -18,14 +18,14 @@ function(add_memory_macro _MEM_NAME)
   set(sim_model ${CMAKE_CURRENT_BINARY_DIR}/${_MEM_NAME}.v)
   set(syn_lib ${CMAKE_CURRENT_BINARY_DIR}/${_MEM_NAME}${SYN_LIB_POSTFIX})
   set(syn_db ${CMAKE_CURRENT_BINARY_DIR}/${_MEM_NAME}.db)
-  set(sim_wrapper ${CMAKE_CURRENT_BINARY_DIR}/${_MEM_NAME}_wrapper.v)
+  set(sim_wrapper ${CMAKE_CURRENT_BINARY_DIR}/${_MEM_NAME}_wrapper.sv)
 
   # Cannot use specify_design() here, since the function will be called out of this IP
   DONTUSE_add_ip_sources(memory_gen ${sim_model} ${sim_wrapper} ${syn_db})
   # Try using specify_design() instead
 
   set(options SRAM RF)
-  set(oneValueArgs BIT_WIDTH FREQ MUX SIZE)
+  set(oneValueArgs BIT_WIDTH FREQ MUX SIZE NUM_BANK)
   set(multiValueArgs "")
   cmake_parse_arguments(MEMGEN "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(MEMGEN_INSTNAME ${_MEM_NAME})

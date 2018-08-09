@@ -1,18 +1,46 @@
-module @MEMGEN_INSTNAME@_wrapper (
-  input  [$clog2(@MEMGEN_SIZE@)-1:0] addr_i,
-  input  [@MEMGEN_BIT_WIDTH@-1:0]    wdata_i,
-  output [@MEMGEN_BIT_WIDTH@-1:0]    rdata_o,
-  input                              enable_i,
-  input                              write_i,
-  input                              clk_i
+module @MEMGEN_INSTNAME@_wrapper #(
+  parameter PROPER_NUM_BANK = (1 == @MEMGEN_NUM_BANK@) ? 1 : 1<<$clog2(@MEMGEN_NUM_BANK@),
+  parameter BANK_IDX_BITS = (1 == PROPER_NUM_BANK) ? 1 : $clog2(PROPER_NUM_BANK),
+  parameter ADDR_BITS = $clog2((@MEMGEN_SIZE@) * PROPER_NUM_BANK),
+  parameter BANK_ADDR_BITS = $clog2(@MEMGEN_SIZE@),
+  parameter DATA_BITS = @MEMGEN_BIT_WIDTH@
+)(
+  input  [ADDR_BITS-1:0] addr_i,
+  input  [DATA_BITS-1:0] wdata_i,
+  output [DATA_BITS-1:0] rdata_o,
+  input                  enable_i,
+  input                  write_i,
+  input                  clk_i
 );
-  @MEMGEN_INSTNAME@ MEM (
-    .Q(rdata_o),
-    .CLK(clk_i),
-    .CEN(~enable_i),
-    .WEN(~write_i),
-    .A(addr_i),
-    .D(wdata_i),
-    .EMA(3'b0)
-  );
+  logic [BANK_IDX_BITS-1:0] bnk_idx, bnk_idx_d;
+  logic [BANK_ADDR_BITS-1:0] bnk_addr;
+  logic [PROPER_NUM_BANK-1:0][DATA_BITS-1:0] rdata;
+  assign bnk_idx = (1 == PROPER_NUM_BANK) ? 0 : addr_i[BANK_IDX_BITS-1:0];
+  assign bnk_addr = (1 == PROPER_NUM_BANK) ? addr_i : addr_i[ADDR_BITS-1:BANK_IDX_BITS];
+  assign rdata_o = rdata[bnk_idx_d];
+
+  always_ff @(posedge clk_i)
+  begin
+    bnk_idx_d <= bnk_idx;
+  end
+
+  genvar index;  
+  generate  
+    for (index = 0; index < PROPER_NUM_BANK; index = index+1)  
+    begin
+      wire                      bnk_sel = (index == bnk_idx);
+      wire                      bnk_ce = bnk_sel && enable_i;
+      wire                      bnk_we = bnk_sel && write_i;
+      @MEMGEN_INSTNAME@ MEM (
+        .Q(rdata[index]),
+        .CLK(clk_i),
+        .CEN(~bnk_ce),
+        .WEN(~bnk_we),
+        .A(bnk_addr),
+        .D(wdata_i),
+        .EMA(3'b0)
+      );
+    end  
+  endgenerate 
+
 endmodule
