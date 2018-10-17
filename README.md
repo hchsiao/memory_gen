@@ -26,6 +26,11 @@ This tool is designed to be modular, new types of memory can be supported by add
 ## Usage
 In the root CMakeFileList.txt of the parent design, add this call:
 ```cmake
+add_ip(memory_gen)
+```
+
+For each memory with different dimension:
+```cmake
 add_memory_macro(${MEMORY_NAME} ${TYPE}
   FREQ      ${FREQ}
   BIT_WIDTH ${BIT_WIDTH}
