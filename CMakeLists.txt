@@ -33,7 +33,10 @@ function(add_memory_macro _MEM_NAME)
   if(NOT DEFINED MEMGEN_MUX)
     message(FATAL_ERROR "Parameter MUX not defined")
   endif()
-  if(${MEMGEN_RF})
+
+  configure_file(${memory_gen_DIR}/src/lib2db.tcl.in ${_MEM_NAME}_lib2db.tcl)
+
+  if(${MEMGEN_RF}) # instantiation as register-file macro
     add_custom_command(OUTPUT ${sim_model}
       COMMAND ${TSMC90Memory_RF_1P_BIN} verilog -spec ${mem_spec}
       COMMENT "Generating memory"
@@ -51,7 +54,12 @@ function(add_memory_macro _MEM_NAME)
 
     configure_file(${memory_gen_DIR}/src/wrapper.sv.in ${sim_wrapper})
     configure_file(${memory_gen_DIR}/src/regfile_1p.spec.in ${mem_spec})
-  else() # SRAM
+    add_custom_command(OUTPUT ${syn_db}
+      DEPENDS ${syn_lib}
+      COMMAND ${LC_SHELL_BIN} -f ${_MEM_NAME}_lib2db.tcl
+      COMMENT "Generating memory db file"
+      )
+  elseif(${MEMGEN_SRAM}) # instantiation as SRAM macro
     add_custom_command(OUTPUT ${sim_model}
       COMMAND ${TSMC90Memory_SRAM_1P_BIN} verilog -spec ${mem_spec}
       COMMENT "Generating memory"
@@ -69,13 +77,22 @@ function(add_memory_macro _MEM_NAME)
 
     configure_file(${memory_gen_DIR}/src/wrapper.sv.in ${sim_wrapper})
     configure_file(${memory_gen_DIR}/src/sram_1p.spec.in ${mem_spec})
-  endif()
-  configure_file(${memory_gen_DIR}/src/lib2db.tcl.in ${_MEM_NAME}_lib2db.tcl)
-  add_custom_command(OUTPUT ${syn_db}
-    DEPENDS ${syn_lib}
-    COMMAND ${LC_SHELL_BIN} -f ${_MEM_NAME}_lib2db.tcl
-    COMMENT "Generating memory db file"
+    add_custom_command(OUTPUT ${syn_db}
+      DEPENDS ${syn_lib}
+      COMMAND ${LC_SHELL_BIN} -f ${_MEM_NAME}_lib2db.tcl
+      COMMENT "Generating memory db file"
+      )
+  else() # inference instead of instantiation
+    add_custom_command(OUTPUT ${sim_model}
+      COMMAND touch ${sim_model}
+      COMMENT "Generating memory"
     )
+
+    set(MEMGEN_PHY_SIZE ${MEMGEN_PHY_SIZE})
+    message("Requested memory size: ${MEMGEN_SIZE}, actual physical size ${MEMGEN_PHY_SIZE}")
+
+    configure_file(${memory_gen_DIR}/src/infer.sv.in ${sim_wrapper})
+  endif()
   add_custom_target(memory_gen_sim_${_MEM_NAME} DEPENDS ${sim_model})
   add_dependencies(c2mk_pre_simulation memory_gen_sim_${_MEM_NAME})
   add_custom_target(memory_gen_synth_${_MEM_NAME} DEPENDS ${syn_db})

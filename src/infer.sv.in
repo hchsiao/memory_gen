@@ -1,0 +1,28 @@
+module @MEMGEN_INSTNAME@_wrapper #(
+  parameter MEM_SIZE_TOTAL = (@MEMGEN_SIZE@) * (@MEMGEN_NUM_BANK@),
+  parameter PROPER_NUM_BANK = (1 == @MEMGEN_NUM_BANK@) ? 1 : 1<<$clog2(@MEMGEN_NUM_BANK@),
+  parameter BANK_IDX_BITS = (1 == PROPER_NUM_BANK) ? 1 : $clog2(PROPER_NUM_BANK),
+  parameter ADDR_BITS = $clog2((@MEMGEN_SIZE@) * PROPER_NUM_BANK),
+  parameter BANK_ADDR_BITS = $clog2(@MEMGEN_SIZE@),
+  parameter DATA_BITS = @MEMGEN_BIT_WIDTH@
+)(
+  input  [ADDR_BITS-1:0] addr_i,
+  input  [DATA_BITS-1:0] wdata_i,
+  output [DATA_BITS-1:0] rdata_o,
+  input                  enable_i,
+  input                  write_i,
+  input                  clk_i
+);
+  reg [ADDR_BITS-1:0] raddr_q;
+  reg [DATA_BITS-1:0] mem[0:MEM_SIZE_TOTAL-1];
+  assign rdata_o = mem[raddr_q];
+  always @(posedge clk_i)
+  begin
+    if (enable_i)
+    begin
+      raddr_q <= addr_i;
+      if (write_i)
+        mem[addr_i] <= wdata_i;
+    end
+  end
+endmodule
