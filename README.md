@@ -30,6 +30,8 @@ git submodule init # if not done yet
 git submodule add $URL_TO_THIS_REPO ip/memory_gen
 ```
 
+Modify `cmake/FindTSMC90Memory.cmake` to match your environment.
+
 In the root CMakeFileList.txt of the parent design, add this call:
 ```cmake
 add_ip(memory_gen)
@@ -69,7 +71,8 @@ Inbound ports: \<Name\>_i; outbound ports: \<Name\>_o.
 | clk_i | CLOCK | the clock | 
 
 ## Known issue
- - Add tests
+ - cmake find script uses hardcoded paths
+ - TODO: Add tests
  - The MUX option is not really technology independent!
  - Should not expose implementation details such as banks
 
